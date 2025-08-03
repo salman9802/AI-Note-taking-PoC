@@ -18,5 +18,9 @@ app.use("/", router);
 app.use(errorMiddleware);
 
 app.listen(ENV.PORT, (err) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
   console.log("Server started");
 });

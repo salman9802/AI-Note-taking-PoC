@@ -134,9 +134,9 @@ export const validateAccessToken = (accessToken: string) => {
 };
 
 export const deleteUserSession = async (userId: string) => {
-  await prisma.user.delete({
+  await prisma.userSession.deleteMany({
     where: {
-      id: userId,
+      userId: userId,
     },
   });
 };

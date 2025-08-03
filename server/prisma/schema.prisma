@@ -21,6 +21,8 @@ model User {
 
   createdAt   DateTime     @default(now())
   UserSession UserSession?
+
+  @@map("users")
 }
 
 model UserSession {
@@ -30,4 +32,6 @@ model UserSession {
 
   createdAt DateTime @default(now())
   expiresAt DateTime
+
+  @@map("user_sessions")
 }

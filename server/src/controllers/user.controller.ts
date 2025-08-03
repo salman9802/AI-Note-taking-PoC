@@ -74,5 +74,5 @@ export const logoutUser = async (
 
   await UserService.deleteUserSession(user.id);
 
-  UserService.unsetRefreshTokenCookie(res).status(STATUS_CODES.OK).end();
+  UserService.unsetRefreshTokenCookie(res).sendStatus(STATUS_CODES.OK);
 };

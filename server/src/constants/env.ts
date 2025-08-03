@@ -2,7 +2,7 @@ import path from "path";
 
 import dotenv from "dotenv";
 dotenv.config({
-  path: path.join("..", "..", "..", ".env"),
+  path: path.join(__dirname, "..", "..", "..", ".env"),
 });
 
 import { z } from "zod";
@@ -36,11 +36,12 @@ try {
   env = envSchema.parse(process.env);
 } catch (error) {
   if (error instanceof z.ZodError) {
-    error.issues.map(
-      (issue) =>
+    error.issues.map((issue) =>
+      console.error(
         `Invalid environment variable '${String(issue.path[0])}'. ${
           issue.message
         }`
+      )
     );
     process.exit(1);
   } else throw error;

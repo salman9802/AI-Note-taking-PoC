@@ -27,4 +27,5 @@ export const userHasAccess = async (
     throw new AppError(STATUS_CODES.UNAUTHORIZED, "Unauthorized");
 
   req.user = user;
+  next();
 };
