@@ -28,6 +28,8 @@ const envSchema = z.object({
   ),
   ACCESS_TOKEN_SECRET: z.string(),
   REFRESH_TOKEN_SECRET: z.string(),
+  OPENAI_API_KEY: z.string(),
+  HF_TOKEN: z.string(),
 });
 
 let env;

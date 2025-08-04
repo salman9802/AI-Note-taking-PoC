@@ -29,3 +29,27 @@ export const userHasAccess = async (
   req.user = user;
   next();
 };
+
+export const checkNoteOwnership = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const user = req.user;
+  if (user === undefined)
+    throw new AppError(STATUS_CODES.UNAUTHORIZED, "Unauthorized");
+
+  const noteId = req.params.noteId;
+
+  const userNote = await prisma.userNote.findFirst({
+    where: {
+      id: noteId,
+      userId: user.id,
+    },
+  });
+
+  if (userNote === null)
+    throw new AppError(STATUS_CODES.NOT_FOUND, "Note not found");
+
+  next();
+};

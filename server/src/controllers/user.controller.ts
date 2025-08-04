@@ -1,11 +1,19 @@
 import express from "express";
 
 import * as UserService from "../services/user.service";
+// import * as OpenAIService from "../services/openai.service";
+import * as HuggingfaceAIService from "../services/huggingface.service";
 
 import prisma from "../db/client";
-import { loginPayloadSchema, newUserSchema } from "../lib/schemas";
+import {
+  loginPayloadSchema,
+  newNoteSchema,
+  newUserSchema,
+  updateUserNotePayloadSchema,
+} from "../lib/schemas";
 import { AppError } from "../lib/error";
 import { STATUS_CODES } from "../constants/http";
+import { ENV } from "../constants/env";
 
 export const registerUser = async (
   req: express.Request,
@@ -75,4 +83,191 @@ export const logoutUser = async (
   await UserService.deleteUserSession(user.id);
 
   UserService.unsetRefreshTokenCookie(res).sendStatus(STATUS_CODES.OK);
+};
+
+export const newAccessToken = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const refreshToken = req.signedCookies[ENV.REFRESH_TOKEN_COOKIE];
+
+  if (!refreshToken)
+    throw new AppError(STATUS_CODES.UNAUTHORIZED, "Unauthorized");
+
+  const userSession = await UserService.validateSession(refreshToken);
+
+  if (!userSession)
+    throw new AppError(
+      STATUS_CODES.UNAUTHORIZED,
+      "Session expired or does not exists"
+    );
+
+  const accessToken = UserService.createAccessToken(userSession);
+
+  // const user = await prisma.user.findFirst({
+  //   where: {
+  //     id: userSession.userId,
+  //   },
+  //   select: {
+  //     id: true,
+  //     email: true,
+  //   },
+  // });
+
+  // if(user !== null)
+  //   throw new AppError(STATUS_CODES.NOT_FOUND);
+
+  res.status(STATUS_CODES.OK).json({
+    accessToken,
+    // user,
+  });
+};
+
+export const fetchUserNotes = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const user = req.user!;
+
+  const userNotes = await prisma.userNote.findMany({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  res.status(STATUS_CODES.OK).json({
+    notes: userNotes,
+  });
+};
+
+export const fetchUserNote = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const noteId = req.params.id;
+
+  const userNote = await prisma.userNote.findMany({
+    where: {
+      id: noteId,
+    },
+  });
+
+  res.status(STATUS_CODES.OK).json({
+    note: userNote,
+  });
+};
+
+export const createUserNote = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const user = req.user!;
+  const data = newNoteSchema.parse(req.body);
+
+  const newNote = await UserService.createUserNote(data, user.id);
+
+  res.status(STATUS_CODES.OK).json({
+    note: newNote,
+  });
+};
+
+export const updateUserNote = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const data = updateUserNotePayloadSchema.parse(req.body);
+
+  const updatedNote = await UserService.updateUserNote(data, req.params.noteId);
+
+  res.status(STATUS_CODES.OK).json({
+    note: updatedNote,
+  });
+};
+
+export const deleteUserNote = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const deleteNote = await UserService.deleteUserNote(req.params.noteId);
+
+  res.status(STATUS_CODES.OK).json({
+    note: deleteNote,
+  });
+};
+
+export const generateNoteSummary = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const noteId = req.params.noteId;
+
+  const note = await prisma.userNote.findFirst({
+    where: {
+      id: noteId,
+    },
+  });
+
+  if (note == null)
+    throw new AppError(STATUS_CODES.NOT_FOUND, "Note not found");
+
+  const summary = await HuggingfaceAIService.generateNoteContentSummary(
+    note.content
+  );
+
+  res.status(STATUS_CODES.OK).json({
+    summary,
+  });
+};
+
+export const improveNoteContent = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const noteId = req.params.noteId;
+
+  const note = await prisma.userNote.findFirst({
+    where: {
+      id: noteId,
+    },
+  });
+
+  if (note == null)
+    throw new AppError(STATUS_CODES.NOT_FOUND, "Note not found");
+
+  const improved = await HuggingfaceAIService.improveNoteContent(note.content);
+
+  res.status(STATUS_CODES.OK).json({
+    improved,
+  });
+};
+
+export const generateNoteTags = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const noteId = req.params.noteId;
+
+  const note = await prisma.userNote.findFirst({
+    where: {
+      id: noteId,
+    },
+  });
+
+  if (note == null)
+    throw new AppError(STATUS_CODES.NOT_FOUND, "Note not found");
+
+  const tags = await HuggingfaceAIService.generateNoteTags(note.content);
+
+  res.status(STATUS_CODES.OK).json({
+    tags,
+  });
 };

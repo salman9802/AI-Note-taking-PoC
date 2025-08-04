@@ -39,6 +39,7 @@ export const errorMiddleware: express.ErrorRequestHandler = (
       stack: prettifyError(error),
       message: error.message,
     });
+    return;
   }
 
   // Server-related error. (default)

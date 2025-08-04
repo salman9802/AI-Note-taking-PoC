@@ -2,13 +2,21 @@ import express from "express";
 import jwt from "jsonwebtoken";
 
 import prisma from "../db/client";
-import { LoginPayload, NewUser } from "../lib/schemas";
+import {
+  LoginPayload,
+  NewNote,
+  NewUser,
+  UpdateUserNotePayload,
+} from "../lib/schemas";
 import { sanitizeUser } from "../lib/sanitize";
 import { ENV } from "../constants/env";
 import { UserSession } from "../../generated/prisma";
-import { DEFAULT_COOKIE_OPTIONS } from "../constants/cookie";
+import {
+  DEFAULT_COOKIE_OPTIONS,
+  REFRESH_TOKEN_COOKIE_PATH,
+} from "../constants/cookie";
 import { comparePassword } from "../lib/hash";
-import { AccessTokenJwtPayload } from "../types/auth";
+import { AccessTokenJwtPayload, RefreshTokenJwtPayload } from "../types/auth";
 import { AppError } from "../lib/error";
 import { STATUS_CODES } from "../constants/http";
 
@@ -85,14 +93,14 @@ export const setRefreshTokenCookie = (
 ) =>
   res.cookie(ENV.REFRESH_TOKEN_COOKIE, refreshToken, {
     ...DEFAULT_COOKIE_OPTIONS,
-    path: "/user/session/access",
+    path: REFRESH_TOKEN_COOKIE_PATH,
     expires: new Date(Date.now() + ENV.REFRESH_TOKEN_INTERVAL),
   });
 
 export const unsetRefreshTokenCookie = (res: express.Response) =>
   res.clearCookie(ENV.REFRESH_TOKEN_COOKIE, {
     ...DEFAULT_COOKIE_OPTIONS,
-    path: "/user/session/access",
+    path: REFRESH_TOKEN_COOKIE_PATH,
     expires: new Date(Date.now() + ENV.REFRESH_TOKEN_INTERVAL),
   });
 
@@ -137,6 +145,89 @@ export const deleteUserSession = async (userId: string) => {
   await prisma.userSession.deleteMany({
     where: {
       userId: userId,
+    },
+  });
+};
+
+/** Returns refresh token payload if valid or throws App error if expired */
+export const validateRefreshToken = (refreshToken: any) => {
+  try {
+    const refreshPayload = jwt.verify(
+      refreshToken,
+      ENV.REFRESH_TOKEN_SECRET
+    ) as RefreshTokenJwtPayload;
+    return refreshPayload;
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError)
+      throw new AppError(STATUS_CODES.UNAUTHORIZED, "Refresh token expired");
+    else
+      throw new AppError(
+        STATUS_CODES.INTERNAL_SERVER_ERROR,
+        "Something went wrong"
+      );
+  }
+};
+
+/** Validates if a session is valid & deletes expired session */
+export const validateSession = async (refreshToken: any) => {
+  const refreshPayload = validateRefreshToken(refreshToken);
+
+  const userSession = await prisma.userSession.findFirst({
+    where: {
+      id: refreshPayload.id,
+    },
+  });
+
+  if (userSession === null) return null;
+
+  if (Date.now() < userSession.expiresAt.getTime()) {
+    // if not expired
+
+    await prisma.userSession.update({
+      data: {
+        expiresAt: new Date(Date.now() + ENV.REFRESH_TOKEN_INTERVAL),
+      },
+      where: {
+        id: refreshPayload.id,
+      },
+    });
+
+    return userSession;
+  } else {
+    // if expired
+
+    await prisma.userSession.delete({
+      where: {
+        id: refreshPayload.id,
+      },
+    });
+
+    return false;
+  }
+};
+
+export const createUserNote = async (note: NewNote, userId: string) => {
+  return await prisma.userNote.create({
+    data: { ...note, userId },
+  });
+};
+
+export const updateUserNote = async (
+  note: UpdateUserNotePayload,
+  noteId: string
+) => {
+  return await prisma.userNote.update({
+    data: { title: note.title, content: note.content },
+    where: {
+      id: noteId,
+    },
+  });
+};
+
+export const deleteUserNote = async (noteId: string) => {
+  return await prisma.userNote.delete({
+    where: {
+      id: noteId,
     },
   });
 };

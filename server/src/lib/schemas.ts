@@ -17,3 +17,15 @@ export const loginPayloadSchema = z.object({
     .regex(/\d/, "Must contain at least one number"),
 });
 export type LoginPayload = z.infer<typeof loginPayloadSchema>;
+
+export const newNoteSchema = z.object({
+  title: z.string(),
+  content: z.string(),
+});
+export type NewNote = z.infer<typeof newNoteSchema>;
+
+export const updateUserNotePayloadSchema = z.object({
+  title: z.string().optional(),
+  content: z.string().optional(),
+});
+export type UpdateUserNotePayload = z.infer<typeof updateUserNotePayloadSchema>;

@@ -127,6 +127,21 @@ exports.Prisma.UserSessionScalarFieldEnum = {
   expiresAt: 'expiresAt'
 };
 
+exports.Prisma.UserNoteScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  createdAt: 'createdAt',
+  userId: 'userId'
+};
+
+exports.Prisma.UserNoteTagScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  noteId: 'noteId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -140,7 +155,9 @@ exports.Prisma.QueryMode = {
 
 exports.Prisma.ModelName = {
   User: 'User',
-  UserSession: 'UserSession'
+  UserSession: 'UserSession',
+  UserNote: 'UserNote',
+  UserNoteTag: 'UserNoteTag'
 };
 
 /**

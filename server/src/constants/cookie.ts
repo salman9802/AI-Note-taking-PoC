@@ -8,3 +8,5 @@ export const DEFAULT_COOKIE_OPTIONS: express.CookieOptions = {
   secure: ENV.NODE_ENV === "production",
   signed: true,
 } as const;
+
+export const REFRESH_TOKEN_COOKIE_PATH = "/user/access";
