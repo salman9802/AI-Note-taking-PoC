@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,7 +17,6 @@ import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogTrigger,
@@ -28,14 +26,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuthApi } from "@/lib/hooks";
 import type { Note, NoteTag } from "@/lib/types";
 import axios from "axios";
-
-const dummyNote = {
-  tags: ["lorem", "ipsum", "dolor"],
-  title: "Lorem ipsum dolor sit amet consectetur adipisicing.",
-  content: `Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quia temporanihil nostrum ex aliquam corporis.
-Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quia temporanihil nostrum ex aliquam corporis.
-Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quia temporanihil nostrum ex aliquam corporis.`,
-};
 
 const AiSummaryButton = ({
   className,
@@ -438,9 +428,7 @@ const NotePage = () => {
             ) : (
               <div className="flex flex-col gap-3">
                 {improvedContent.split(/\n+/).map((line, i) => (
-                  <p key={i} className="text-gray-800">
-                    {line}
-                  </p>
+                  <p key={i}>{line}</p>
                 ))}
               </div>
             )}

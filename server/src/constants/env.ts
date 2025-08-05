@@ -30,6 +30,10 @@ const envSchema = z.object({
   REFRESH_TOKEN_SECRET: z.string(),
   OPENAI_API_KEY: z.string(),
   HF_TOKEN: z.string(),
+  STANDALONE: z.preprocess(
+    (val) => (typeof val === "string" ? Boolean(val) : val),
+    z.boolean().optional().default(false)
+  ),
 });
 
 let env;

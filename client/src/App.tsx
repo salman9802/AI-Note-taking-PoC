@@ -9,6 +9,7 @@ import AuthSwitch from "./components/AuthSwitch";
 import { useRefreshToken } from "./lib/hooks";
 import { useAuth } from "./context/AuthContext";
 import Loader from "./components/Loader";
+import axios from "axios";
 
 const App = () => {
   const refresh = useRefreshToken();
@@ -17,10 +18,19 @@ const App = () => {
 
   React.useLayoutEffect(() => {
     (async () => {
-      setCheckingUser(true);
-      const user = await refresh();
-      setUser(user);
-      setCheckingUser(false);
+      try {
+        setCheckingUser(true);
+        const user = await refresh();
+        setUser(user);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          alert(error.response?.data.message || "Something went wrong");
+        } else {
+          alert("Something went wrong");
+        }
+      } finally {
+        setCheckingUser(false);
+      }
     })();
   }, []);
 

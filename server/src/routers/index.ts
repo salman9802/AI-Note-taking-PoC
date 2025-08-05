@@ -4,7 +4,7 @@ import userRouter from "./user.router";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
+router.get("/test", (req, res) => {
   res.json({ msg: "server running" });
 });
 
