@@ -225,6 +225,13 @@ export const updateUserNote = async (
 };
 
 export const deleteUserNote = async (noteId: string) => {
+  // Before deleting the UserNote, manually delete the associated UserNoteTags
+  await prisma.userNoteTag.deleteMany({
+    where: {
+      noteId,
+    },
+  });
+
   return await prisma.userNote.delete({
     where: {
       id: noteId,

@@ -185,6 +185,12 @@ const updateUserNote = (note, noteId) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.updateUserNote = updateUserNote;
 const deleteUserNote = (noteId) => __awaiter(void 0, void 0, void 0, function* () {
+    // Before deleting the UserNote, manually delete the associated UserNoteTags
+    yield client_1.default.userNoteTag.deleteMany({
+        where: {
+            noteId,
+        },
+    });
     return yield client_1.default.userNote.delete({
         where: {
             id: noteId,

@@ -231,6 +231,7 @@ const NotePage = () => {
         navigate("/");
       } catch (error) {
         if (axios.isAxiosError(error)) {
+          console.error(error);
           alert(error.response?.data.message || "Something went wrong");
         } else {
           alert("Something went wrong");

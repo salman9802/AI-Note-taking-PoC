@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import { useAuthApi } from "@/lib/hooks";
@@ -40,6 +40,8 @@ const HomePage = () => {
   const [loadingNotes, setLoadingNotes] = React.useState(false);
   const [noteTitle, setNoteTitle] = React.useState("");
 
+  const navigate = useNavigate();
+
   const createNote = async () => {
     if (newNote.title.length === 0 || newNote.content.length === 0) return;
 
@@ -63,6 +65,20 @@ const HomePage = () => {
     setNewNote(defaultNewNote);
   };
 
+  const logout = async () => {
+    try {
+      await authApi.delete("/user/logout");
+      alert("Logout successful");
+      navigate("/");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        alert(error.response?.data.message || "Something went wrong");
+      } else {
+        alert("Something went wrong");
+      }
+    }
+  };
+
   /** useEffect to load notes */
   React.useEffect(() => {
     (async () => {
@@ -73,11 +89,11 @@ const HomePage = () => {
         setNotes(notes);
         setLoadingNotes(false);
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          alert(error.response?.data.message || "Something went wrong");
-        } else {
-          alert("Something went wrong");
-        }
+        // if (axios.isAxiosError(error)) {
+        //   alert(error.response?.data.message || "Something went wrong");
+        // } else {
+        //   alert("Something went wrong");
+        // }
       }
     })();
   }, []);
@@ -93,10 +109,11 @@ const HomePage = () => {
           </span>
         </h1>
 
-        {/* Theme Toggle Placeholder */}
-        <div id="theme-toggle-placeholder">
-          <ModeToggle />
-        </div>
+        <Button onClick={logout} variant="outline">
+          Logout
+        </Button>
+
+        <ModeToggle />
       </header>
 
       {/* Notes Grid */}
