@@ -10,7 +10,7 @@ import { TIME } from "./time";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("development"),
-  PORT: z.number().default(80),
+  // PORT: z.number().default(80),
   ACCESS_TOKEN_INTERVAL: z.preprocess(
     (val) => (typeof val === "string" ? Number(val) : val),
     z.number().default(15 * TIME.MINUTE)

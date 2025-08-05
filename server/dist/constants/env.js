@@ -13,7 +13,7 @@ const zod_1 = require("zod");
 const time_1 = require("./time");
 const envSchema = zod_1.z.object({
     NODE_ENV: zod_1.z.enum(["development", "production"]).default("development"),
-    PORT: zod_1.z.number().default(80),
+    // PORT: z.number().default(80),
     ACCESS_TOKEN_INTERVAL: zod_1.z.preprocess((val) => (typeof val === "string" ? Number(val) : val), zod_1.z.number().default(15 * time_1.TIME.MINUTE)),
     REFRESH_TOKEN_INTERVAL: zod_1.z.preprocess((val) => (typeof val === "string" ? Number(val) : val), zod_1.z.number().default(30 * time_1.TIME.DAY)),
     ACCESS_TOKEN_COOKIE: zod_1.z.string().optional().default("accssess"),

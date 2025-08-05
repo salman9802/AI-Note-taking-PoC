@@ -40,7 +40,7 @@ app.use(errorMiddleware);
 
 const HOST = ENV.NODE_ENV !== "production" ? "localhost" : "0.0.0.0";
 // const HOST = "localhost";
-app.listen(ENV.PORT, HOST, (err) => {
+app.listen(80, HOST, (err) => {
   if (err) {
     console.error(err);
     return;
