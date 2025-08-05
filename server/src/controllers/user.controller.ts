@@ -10,6 +10,7 @@ import {
   newNoteSchema,
   newUserSchema,
   updateUserNotePayloadSchema,
+  userNoteTagsPayloadSchema,
 } from "../lib/schemas";
 import { AppError } from "../lib/error";
 import { STATUS_CODES } from "../constants/http";
@@ -105,22 +106,21 @@ export const newAccessToken = async (
 
   const accessToken = UserService.createAccessToken(userSession);
 
-  // const user = await prisma.user.findFirst({
-  //   where: {
-  //     id: userSession.userId,
-  //   },
-  //   select: {
-  //     id: true,
-  //     email: true,
-  //   },
-  // });
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userSession.userId,
+    },
+    select: {
+      id: true,
+      email: true,
+    },
+  });
 
-  // if(user !== null)
-  //   throw new AppError(STATUS_CODES.NOT_FOUND);
+  if (user === null) throw new AppError(STATUS_CODES.NOT_FOUND);
 
   res.status(STATUS_CODES.OK).json({
     accessToken,
-    // user,
+    ...user,
   });
 };
 
@@ -147,11 +147,22 @@ export const fetchUserNote = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const noteId = req.params.id;
+  const { noteId } = req.params;
 
-  const userNote = await prisma.userNote.findMany({
+  const userNote = await prisma.userNote.findFirst({
     where: {
       id: noteId,
+    },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      noteTags: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -195,6 +206,53 @@ export const deleteUserNote = async (
   next: express.NextFunction
 ) => {
   const deleteNote = await UserService.deleteUserNote(req.params.noteId);
+
+  res.status(STATUS_CODES.OK).json({
+    note: deleteNote,
+  });
+};
+
+export const createUserNoteTags = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const parsed = userNoteTagsPayloadSchema.parse(req.body);
+  const { noteId } = req.params;
+
+  // for (const tag of parsed.tags) {
+  // await prisma.userNoteTag.createMany({
+  //   data: parsed.tags.map((tag) => ({
+  //     name: tag,
+  //     noteId,
+  //   })),
+  // });
+  // }
+
+  const tags = await Promise.all(
+    parsed.tags.map((tag) =>
+      prisma.userNoteTag.create({
+        data: {
+          name: tag,
+          noteId,
+        },
+      })
+    )
+  );
+
+  res.status(STATUS_CODES.OK).json({
+    tags,
+  });
+};
+
+export const deleteUserNoteTag = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const { noteId, tagId } = req.params;
+
+  const deleteNote = await UserService.deleteUserNoteTag(noteId, tagId);
 
   res.status(STATUS_CODES.OK).json({
     note: deleteNote,

@@ -29,3 +29,8 @@ export const updateUserNotePayloadSchema = z.object({
   content: z.string().optional(),
 });
 export type UpdateUserNotePayload = z.infer<typeof updateUserNotePayloadSchema>;
+
+export const userNoteTagsPayloadSchema = z.object({
+  tags: z.string().array(),
+});
+export type UserNoteTagsPayload = z.infer<typeof userNoteTagsPayloadSchema>;

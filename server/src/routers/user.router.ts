@@ -47,6 +47,20 @@ userRouter.delete(
   errorCatch(UserController.deleteUserNote)
 );
 
+userRouter.post(
+  "/note/:noteId/tag",
+  errorCatch(userHasAccess),
+  errorCatch(checkNoteOwnership),
+  errorCatch(UserController.createUserNoteTags)
+);
+
+userRouter.delete(
+  "/note/:noteId/tag/:tagId",
+  errorCatch(userHasAccess),
+  errorCatch(checkNoteOwnership),
+  errorCatch(UserController.deleteUserNoteTag)
+);
+
 // AI feat endpoints
 userRouter.get(
   "/note/:noteId/summary",

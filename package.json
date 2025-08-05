@@ -1,0 +1,13 @@
+{
+  "name": "peacock-india-poc",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev:all": "concurrently \"npm run dev:client\" \"npm run dev:server\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

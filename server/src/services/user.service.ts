@@ -231,3 +231,12 @@ export const deleteUserNote = async (noteId: string) => {
     },
   });
 };
+
+export const deleteUserNoteTag = async (noteId: string, tagId: string) => {
+  return await prisma.userNoteTag.delete({
+    where: {
+      id: tagId,
+      noteId,
+    },
+  });
+};
