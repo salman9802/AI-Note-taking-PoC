@@ -19,6 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import { useAuthApi } from "@/lib/hooks";
 import Loader from "@/components/Loader";
+import { Search } from "lucide-react";
 
 const defaultNewNote = {
   showPrompt: false,
@@ -37,6 +38,7 @@ const HomePage = () => {
     }
   >(defaultNewNote);
   const [loadingNotes, setLoadingNotes] = React.useState(false);
+  const [noteTitle, setNoteTitle] = React.useState("");
 
   const createNote = async () => {
     if (newNote.title.length === 0 || newNote.content.length === 0) return;
@@ -99,6 +101,16 @@ const HomePage = () => {
 
       {/* Notes Grid */}
       <main className="container mx-auto flex-1 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <Input
+            placeholder="Search note by title"
+            value={noteTitle}
+            onChange={(e) => setNoteTitle(e.target.value)}
+          />
+          <button>
+            <Search className="size-5" />
+          </button>
+        </div>
         <h1 className="my-6 text-3xl font-semibold md:text-4xl">Notes</h1>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {/* Plus (Create Note) Card */}
@@ -159,22 +171,24 @@ const HomePage = () => {
           {loadingNotes ? (
             <Loader className="size-1/2" />
           ) : (
-            notes.map((note, i) => (
-              <Link
-                key={i}
-                to={`/note/${note.id}`}
-                className="inline-block h-full"
-              >
-                <Card className="flex h-full flex-col">
-                  <CardContent className="flex-1 space-y-2 p-4">
-                    <h2 className="text-base font-medium">{note.title}</h2>
-                    <p className="line-clamp-3 text-sm text-muted-foreground">
-                      {note.content}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))
+            notes
+              .filter((note) => note.title.includes(noteTitle))
+              .map((note, i) => (
+                <Link
+                  key={i}
+                  to={`/note/${note.id}`}
+                  className="inline-block h-full"
+                >
+                  <Card className="flex h-full flex-col">
+                    <CardContent className="flex-1 space-y-2 p-4">
+                      <h2 className="text-base font-medium">{note.title}</h2>
+                      <p className="line-clamp-3 text-sm text-muted-foreground">
+                        {note.content}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))
           )}
         </div>
       </main>
