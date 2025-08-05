@@ -24,9 +24,9 @@ const App = () => {
         setUser(user);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          alert(error.response?.data.message || "Something went wrong");
+          console.error(error.response?.data.message || "Something went wrong");
         } else {
-          alert("Something went wrong");
+          console.error("Something went wrong");
         }
       } finally {
         setCheckingUser(false);

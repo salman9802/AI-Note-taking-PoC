@@ -89,11 +89,11 @@ const HomePage = () => {
         setNotes(notes);
         setLoadingNotes(false);
       } catch (error) {
-        // if (axios.isAxiosError(error)) {
-        //   alert(error.response?.data.message || "Something went wrong");
-        // } else {
-        //   alert("Something went wrong");
-        // }
+        if (axios.isAxiosError(error)) {
+          alert(error.response?.data.message || "Something went wrong");
+        } else {
+          alert("Something went wrong");
+        }
       }
     })();
   }, []);

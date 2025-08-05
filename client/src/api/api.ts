@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// const SERVER_URL = "http://localhost";
-const SERVER_URL = "/";
+const SERVER_URL = import.meta.env.PROD ? "/" : "http://localhost";
 
 export default axios.create({
   baseURL: SERVER_URL,
